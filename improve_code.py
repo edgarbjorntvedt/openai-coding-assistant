@@ -1,70 +1,50 @@
-import requests
+import argparse
+import os
 import json
-from dotenv import dotenv_values
+import requests
 
-# Load the OpenAI API key and other configurations from the .env file
-config = dotenv_values(".env")
-api_key = config["OPENAI_API_KEY"]
-filename = sys.argv[1] if len(sys.argv) > 1 else config["FILENAME"]
-system_message_file = config["SYSTEM_MESSAGE_FILE"]
+parser = argparse.ArgumentParser(description='Improve code using OpenAI GPT-3')
+parser.add_argument('--filename', type=str, help='Filename of the code to be improved', required=True)
+parser.add_argument('--key', type=str, help='API key for OpenAI', required=True)
+parser.add_argument('--system-message-file', type=str, help='Filename of the system message', required=True)
+args = parser.parse_args()
 
-# Load the content of the file index.mjs
-with open(filename, "r") as file:
-    code = file.read()
+with open(args.filename) as f:
+    code = f.read()
 
-# Set up the API endpoint URL
-url = "https://api.openai.com/v1/chat/completions"
-
-# Set up the request headers
-headers = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {api_key}",
-}
-# Load the content of the system message file
-with open(system_message_file, 'r') as f:
+with open(args.system_message_file) as f:
     system_message = f.read().strip()
 
-token_length = int(len(code + ' ' + system_message)*1.1/4)
-print("guessed token_length: ", token_length)
+token_length = int(len(code + ' ' + system_message) * 1.1 / 4)
+print(f"guessed token_length: {token_length}")
 
-# Set up the request data
-data = {
-    "model": "gpt-3.5-turbo",
-    "messages": [
-        {
-            "role": "system",
-            "content": system_message
-        },
-        {
-            "role": "user",
-            "content":code
-        },
+response = requests.post(
+    'https://api.openai.com/v1/chat/completions',
+    headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {args.key}',
+    },
+    json={
+        'model': 'gpt-3.5-turbo',
+        'messages': [
+            {'role': 'system', 'content': system_message},
+            {'role': 'user', 'content': code},
         ],
-    "temperature": 0.2,
-    "max_tokens": 4097 - token_length,
-}
+        'temperature': 0.2,
+        'max_tokens': 4097 - token_length,
+    }
+)
 
-# Send the request to the API
-response = requests.post(url, headers=headers, data=json.dumps(data))
+response_json = response.json()
 
-# Parse the response JSON
-response_json = json.loads(response.text)
-
-# deep copy the response
 new_response = json.loads(json.dumps(response_json))
-# remove the content field from each message
 for choice in new_response['choices']:
     choice['message']['content'] = '...'
-
-# print the modified response
 print(json.dumps(new_response, indent=2))
 
-# Extract the generated text from the response
 improved_code = response_json["choices"][0]["message"]["content"]
 
-# Backup the original file
-os.rename(filename, filename + ".bck")
+os.rename(args.filename, f'{args.filename}.bck')
 
-# Write the improved code to the file with the same filename as the original file
-with open(filename, "w") as file:
-    file.write(improved_code)
+with open(args.filename, 'w') as f:
+    f.write(improved_code)
