@@ -1,49 +1,36 @@
 # OpenAI Code Improvement Tool
 
-This is a Python script that allows you to send your code to OpenAI to improve it using the OpenAI API. Your code can contain comments and other instructions that OpenAI will take into consideration while improving your code.
+This script is designed to improve a given piece of JavaScript code using the OpenAI GPT-3 language model. This is a Python script that allows you to send your code to OpenAI to improve it using the OpenAI API. Your code should contain comments and other instructions that OpenAI will take into consideration while improving your code.
 
 ## How to use the tool
 
-1.  Create a `.env` file and add your OpenAI API configurations to the file. See `.env.sample` for an example of how the file should look.
-2.  Install the required dependencies by running the following command in your terminal:
+1.  Clone the repository or download the script file.
+2.  Install the required packages by running `pip install -r requirements.txt`.
+3.  Save you openai key (see section below).
+3.  Find the path to your file to improve. Eg:`index.js`. If you want, you can include comments and instructions in your code.
+4.  Run the Python script `improve_code.py` (see usage below)
+5.  The improved code will be saved and you find a backup of your existing code named: `index.js.bck`.
+
+## Usage
+
+To run the script, simply call the Python interpreter with the script file as the argument:
+
+`python3 improve_code.py --filename index.js --system-message-file system_message.txt`
 
 
-Copy code
+## Output
 
-`pip install -r requirements.txt`
+The script will update your code and the original code will be backed up with a .bck suffix.
 
-3.  Add your code to a file named `index.mjs`. If you want, you can include comments and instructions in your code.
-4.  Run the Python script `improve_code.py` by running the following command in your terminal:
+## OpenAI API key
 
+To set the OpenAI API key from the command line, simply run:
 
-Copy code
+`python3 config.py --key <your API key>`
 
-`python3 improve_code.py`
+You can also use the `--print` flag to display the current configuration:
 
-5.  The improved code will be saved in a file named `openai.index.mjs`.
-
-## Configuration
-
-You need to configure the tool with your OpenAI API keys and configurations. 
-Add your API keys and configurations to a `.env` file that 
-is located in the same directory as the Python script.
-
-The following configurations need to be added to the `.env` file:
-
-```
-OPENAI_API_KEY=<your_api_key_here>
-OPENAI_MODEL_ID=davinci-codex-001
-INPUT_FILE=index.mjs
-```
-
-### OpenAI models
-OpenAI offers two models for improving code:
-
--   `davinci-codex-001`: a newer model that analyzes and improves code for a wide range of programming languages.
--   `code-davinci-edit-001`: a highly accurate model for identifying and fixing common coding errors and inefficiencies. 
-     This one is cheeper
-
-To use these models for code improvement, integrate them into your development environment using OpenAI's API.
+`python3 config.py --print`
 
 ## Dependencies
 
@@ -52,7 +39,5 @@ To use these models for code improvement, integrate them into your development e
 -   `python-dotenv==0.19.1`
 
 ## License
+
 This tool is licensed under the MIT License. See the LICENSE file for more information.
-
-
-
