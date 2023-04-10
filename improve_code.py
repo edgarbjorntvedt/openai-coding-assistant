@@ -2,10 +2,10 @@ import argparse
 import os
 import json
 import requests
+from lib.config_helper import get_api_key
 
 parser = argparse.ArgumentParser(description='Improve code using OpenAI GPT-3')
 parser.add_argument('--filename', type=str, help='Filename of the code to be improved', required=True)
-parser.add_argument('--key', type=str, help='API key for OpenAI', required=True)
 parser.add_argument('--system-message-file', type=str, help='Filename of the system message', required=True)
 parser.add_argument('--logs', choices=['verbose', 'info', 'off'], help='Logging level', default='info')
 args = parser.parse_args()
@@ -18,11 +18,13 @@ with open(args.system_message_file) as f:
 
 token_length = int(len(code + ' ' + system_message) * 1.1 / 4)
 
+api_key = get_api_key()
+
 response = requests.post(
     'https://api.openai.com/v1/chat/completions',
     headers={
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {args.key}',
+        'Authorization': f'Bearer {api_key}',
     },
     json={
         'model': 'gpt-3.5-turbo',
